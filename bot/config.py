@@ -405,3 +405,411 @@ def get_level_for_amount(total_recharged: float) -> str:
         if low <= total_recharged <= high:
             return name
     return "برونزي"
+
+
+
+  # =============================================================================
+  # ===== الإضافة المطلوبة: دوال مساعدة + FASTCARD_CATEGORIES + قوائم المنتجات =====
+  # =============================================================================
+
+  # ─── قوائم منتجات ببجي وفري فاير ───
+  PUBG_MEMBERSHIPS = [
+      # مثال: {"id": "pm_1", "label": "Royal Pass شهر", "price": 25000, "product_id": 0, "cost_usd": 1.5}
+      # ← ضع هنا المنتجات من لوحة Fastcard مع product_id الصحيح
+  ]
+
+  PUBG_CODES = [
+      # مثال: {"id": "pc_1", "label": "كود 60 شدة", "price": 15000, "product_id": 0, "cost_usd": 0.9}
+  ]
+
+  FREEFIRE_DIAMOND_OFFERS = [
+      # مثال: {"id": "ff_100", "label": "100 جوهرة", "price": 8000, "product_id": 0, "cost_usd": 0.5}
+  ]
+
+  FREEFIRE_MEMBERSHIPS = []
+  FREEFIRE_CODES = []
+
+  # ─── Supercell ───
+  BRAWL_STARS_OFFERS = []
+  CLASH_OF_CLANS_OFFERS = []
+  CLASH_ROYALE_OFFERS = []
+  HAY_DAY_OFFERS = []
+
+  # ─── ألعاب أخرى ───
+  COD_OFFERS = []
+  COD_PASS_OFFERS = []
+  DELTA_FORCE_OFFERS = []
+  MINECRAFT_OFFERS = []
+  FORTNITE_OFFERS = []
+  LUDO_WORLD_OFFERS = []
+  LUDO_CLUB_OFFERS = []
+  LUDO_YALLA_OFFERS = []
+
+  # ─── بطاقات (أكواد) ───
+  PSN_US_OFFERS = []
+  PSN_SA_OFFERS = []
+  PSN_LB_OFFERS = []
+  PSN_AE_OFFERS = []
+  STEAM_US_OFFERS = []
+  STEAM_SA_OFFERS = []
+  STEAM_TR_OFFERS = []
+  ITUNES_US_OFFERS = []
+  ITUNES_SA_OFFERS = []
+  ITUNES_UK_OFFERS = []
+  GPLAY_US_OFFERS = []
+  GPLAY_SA_OFFERS = []
+  GPLAY_TR_OFFERS = []
+  XBOX_US_OFFERS = []
+  XBOX_SA_OFFERS = []
+  RAZER_GL_OFFERS = []
+  RAZER_US_OFFERS = []
+  RAZER_TR_OFFERS = []
+  NINTENDO_OFFERS = []
+  NETFLIX_OFFERS = []
+  VISA_OFFERS = []
+
+  # ─── اشتراكات ───
+  SHAHID_OFFERS = []
+  YOUTUBE_OFFERS = []
+  ANGHAMI_OFFERS = []
+  OSN_OFFERS = []
+  CHATGPT_OFFERS = []
+  CANVA_OFFERS = []
+  SNAPCHAT_OFFERS = []
+  NORDVPN_OFFERS = []
+  EXPRESSVPN_OFFERS = []
+  LAGOFAST_OFFERS = []
+  GEARUP_OFFERS = []
+  TGBOOST_OFFERS = []
+
+  # ─── تعبئة جوال ───
+  SYRIATEL_BALANCE_OFFERS = []
+  SYRIATEL_GAS_OFFERS = []
+  SYRIATEL_FAWATEER_OFFERS = []
+  SYRIATEL_CASH_OFFERS = []
+  MTN_BALANCE_OFFERS = []
+  MTN_GAS_OFFERS = []
+  MTN_FAWATEER_OFFERS = []
+  MTN_CASH_OFFERS = []
+  SHAMCASH_BAL_OFFERS = []
+  PAYEER_OFFERS = []
+  PERFECTMONEY_OFFERS = []
+  PAYONEER_OFFERS = []
+  CLIQ_JORDAN_OFFERS = []
+  USDT_TRC20_OFFERS = []
+  USDT_BEP20_OFFERS = []
+  TOUCH_OFFERS = []
+  ALFA_OFFERS = []
+  WHISH_OFFERS = []
+  ASIACELL_OFFERS = []
+  ZAIN_IRAQ_OFFERS = []
+  TURKCELL_OFFERS = []
+  TOSLA_OFFERS = []
+  OLDUBIL_OFFERS = []
+  VODAFONE_CASH_OFFERS = []
+  RCELL_OFFERS = []
+  SELAM_TELECOM_OFFERS = []
+
+  # ─── رشق (SMM) ───
+  INSTAGRAM_FOLLOWERS = []
+  INSTAGRAM_LIKES = []
+  INSTAGRAM_VIEWS = []
+  FACEBOOK_FOLLOWERS = []
+  TELEGRAM_VIEWS = []
+  TELEGRAM_REACTIONS = []
+
+
+  # =============================================================================
+  # ===== FASTCARD_CATEGORIES: خريطة كل الأقسام التلقائية =====
+  # =============================================================================
+  # كل قسم يحتاج:
+  #   title       → الاسم الظاهر للمستخدم
+  #   game        → اللعبة/الخدمة (للتسجيل في DB)
+  #   offers_attr → اسم قائمة المنتجات أعلاه
+  #   input_fields→ الحقول المطلوبة من المستخدم (قائمة)
+  #   custom_amount (اختياري) → True للأقسام المفتوحة المبلغ مثل تعبئة الجوال
+
+  FASTCARD_CATEGORIES = {
+      # ─── ببجي عضويات وأكواد ───
+      "pm": {
+          "title": "👑 ببجي موبايل — عضويات",
+          "game": "PUBG",
+          "offers_attr": "PUBG_MEMBERSHIPS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      "pc": {
+          "title": "🎟️ ببجي موبايل — أكواد شدات",
+          "game": "PUBG",
+          "offers_attr": "PUBG_CODES",
+          "input_fields": [],
+      },
+      # ─── فري فاير ───
+      "fm": {
+          "title": "👑 فري فاير — عضويات",
+          "game": "FREEFIRE",
+          "offers_attr": "FREEFIRE_MEMBERSHIPS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      "fc": {
+          "title": "🎟️ فري فاير — أكواد جواهر",
+          "game": "FREEFIRE",
+          "offers_attr": "FREEFIRE_CODES",
+          "input_fields": [],
+      },
+      # ─── Supercell (إيميل + باسورد) ───
+      "bs": {
+          "title": "⭐ Brawl Stars",
+          "game": "BRAWL_STARS",
+          "offers_attr": "BRAWL_STARS_OFFERS",
+          "input_fields": [
+              {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
+              {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
+          ],
+      },
+      "coc": {
+          "title": "🏰 Clash of Clans",
+          "game": "COC",
+          "offers_attr": "CLASH_OF_CLANS_OFFERS",
+          "input_fields": [
+              {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
+              {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
+          ],
+      },
+      "cr": {
+          "title": "👑 Clash Royale",
+          "game": "CLASH_ROYALE",
+          "offers_attr": "CLASH_ROYALE_OFFERS",
+          "input_fields": [
+              {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
+              {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
+          ],
+      },
+      "hd": {
+          "title": "🌾 Hay Day",
+          "game": "HAY_DAY",
+          "offers_attr": "HAY_DAY_OFFERS",
+          "input_fields": [
+              {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
+              {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
+          ],
+      },
+      # ─── COD ───
+      "cod": {
+          "title": "🔫 Call of Duty",
+          "game": "COD",
+          "offers_attr": "COD_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID / UID", "type": "id"}],
+      },
+      "cdbp": {
+          "title": "🎟️ COD Battle Pass",
+          "game": "COD",
+          "offers_attr": "COD_PASS_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID / UID", "type": "id"}],
+      },
+      # ─── ألعاب أخرى ───
+      "df": {
+          "title": "💥 Delta Force",
+          "game": "DELTA_FORCE",
+          "offers_attr": "DELTA_FORCE_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      "mc": {
+          "title": "⛏️ Minecraft",
+          "game": "MINECRAFT",
+          "offers_attr": "MINECRAFT_OFFERS",
+          "input_fields": [{"key": "email", "label": "إيميل Minecraft", "type": "email"}],
+      },
+      "fn": {
+          "title": "🎯 Fortnite",
+          "game": "FORTNITE",
+          "offers_attr": "FORTNITE_OFFERS",
+          "input_fields": [{"key": "email", "label": "إيميل Epic Games", "type": "email"}],
+      },
+      "lw": {
+          "title": "🎲 Ludo World",
+          "game": "LUDO",
+          "offers_attr": "LUDO_WORLD_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      "lc": {
+          "title": "🎲 Ludo Club",
+          "game": "LUDO",
+          "offers_attr": "LUDO_CLUB_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      "yl": {
+          "title": "🎲 Ludo Yalla",
+          "game": "LUDO",
+          "offers_attr": "LUDO_YALLA_OFFERS",
+          "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
+      },
+      # ─── بطاقات (أكواد جاهزة، بدون إدخال) ───
+      "psn_us":   {"title": "🎮 PSN (US)",         "game": "PSN",     "offers_attr": "PSN_US_OFFERS",    "input_fields": []},
+      "psn_sa":   {"title": "🎮 PSN (SA)",         "game": "PSN",     "offers_attr": "PSN_SA_OFFERS",    "input_fields": []},
+      "psn_lb":   {"title": "🎮 PSN (LB)",         "game": "PSN",     "offers_attr": "PSN_LB_OFFERS",    "input_fields": []},
+      "psn_ae":   {"title": "🎮 PSN (AE)",         "game": "PSN",     "offers_attr": "PSN_AE_OFFERS",    "input_fields": []},
+      "steam_us": {"title": "🟦 Steam (US)",       "game": "STEAM",   "offers_attr": "STEAM_US_OFFERS",  "input_fields": []},
+      "steam_sa": {"title": "🟦 Steam (SA)",       "game": "STEAM",   "offers_attr": "STEAM_SA_OFFERS",  "input_fields": []},
+      "steam_tr": {"title": "🟦 Steam (TR)",       "game": "STEAM",   "offers_attr": "STEAM_TR_OFFERS",  "input_fields": []},
+      "itunes_us":{"title": "🍎 iTunes (US)",      "game": "ITUNES",  "offers_attr": "ITUNES_US_OFFERS", "input_fields": []},
+      "itunes_sa":{"title": "🍎 iTunes (SA)",      "game": "ITUNES",  "offers_attr": "ITUNES_SA_OFFERS", "input_fields": []},
+      "itunes_uk":{"title": "🍎 iTunes (UK)",      "game": "ITUNES",  "offers_attr": "ITUNES_UK_OFFERS", "input_fields": []},
+      "gplay_us": {"title": "🤖 Google Play (US)", "game": "GPLAY",   "offers_attr": "GPLAY_US_OFFERS",  "input_fields": []},
+      "gplay_sa": {"title": "🤖 Google Play (SA)", "game": "GPLAY",   "offers_attr": "GPLAY_SA_OFFERS",  "input_fields": []},
+      "gplay_tr": {"title": "🤖 Google Play (TR)", "game": "GPLAY",   "offers_attr": "GPLAY_TR_OFFERS",  "input_fields": []},
+      "xbox_us":  {"title": "🟩 Xbox (US)",        "game": "XBOX",    "offers_attr": "XBOX_US_OFFERS",   "input_fields": []},
+      "xbox_sa":  {"title": "🟩 Xbox (SA)",        "game": "XBOX",    "offers_attr": "XBOX_SA_OFFERS",   "input_fields": []},
+      "razer_gl": {"title": "💚 Razer Gold (GL)",  "game": "RAZER",   "offers_attr": "RAZER_GL_OFFERS",  "input_fields": []},
+      "razer_us": {"title": "💚 Razer Gold (US)",  "game": "RAZER",   "offers_attr": "RAZER_US_OFFERS",  "input_fields": []},
+      "razer_tr": {"title": "💚 Razer Gold (TR)",  "game": "RAZER",   "offers_attr": "RAZER_TR_OFFERS",  "input_fields": []},
+      "nintendo": {"title": "🎮 Nintendo",         "game": "NINTENDO","offers_attr": "NINTENDO_OFFERS",  "input_fields": []},
+      "netflix":  {"title": "🎬 Netflix",          "game": "NETFLIX", "offers_attr": "NETFLIX_OFFERS",   "input_fields": []},
+      "visa":     {"title": "💳 Visa",             "game": "VISA",    "offers_attr": "VISA_OFFERS",      "input_fields": []},
+      # ─── اشتراكات ───
+      "shahid":     {"title": "📺 Shahid",        "game": "SHAHID",     "offers_attr": "SHAHID_OFFERS",     "input_fields": [{"key": "email", "label": "الإيميل / يوزر", "type": "email"}]},
+      "youtube":    {"title": "▶️ YouTube",       "game": "YOUTUBE",    "offers_attr": "YOUTUBE_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل جوجل",     "type": "email"}]},
+      "anghami":    {"title": "🎵 Anghami",       "game": "ANGHAMI",    "offers_attr": "ANGHAMI_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل Anghami", "type": "email"}]},
+      "osn":        {"title": "📺 OSN+",          "game": "OSN",        "offers_attr": "OSN_OFFERS",        "input_fields": [{"key": "email", "label": "إيميل OSN",     "type": "email"}]},
+      "chatgpt":    {"title": "🤖 ChatGPT",       "game": "CHATGPT",    "offers_attr": "CHATGPT_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل OpenAI",  "type": "email"}]},
+      "canva":      {"title": "🎨 Canva Pro",     "game": "CANVA",      "offers_attr": "CANVA_OFFERS",      "input_fields": [{"key": "email", "label": "إيميل Canva",   "type": "email"}]},
+      "snapchat":   {"title": "👻 Snapchat+",     "game": "SNAPCHAT",   "offers_attr": "SNAPCHAT_OFFERS",   "input_fields": [{"key": "phone", "label": "رقم الجوال",    "type": "phone"}]},
+      "nordvpn":    {"title": "🛡️ NordVPN",      "game": "NORDVPN",    "offers_attr": "NORDVPN_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل NordVPN", "type": "email"}]},
+      "expressvpn": {"title": "🛡️ ExpressVPN",   "game": "EXPRESSVPN", "offers_attr": "EXPRESSVPN_OFFERS", "input_fields": [{"key": "email", "label": "إيميل ExpressVPN", "type": "email"}]},
+      "lagofast":   {"title": "⚡ LagoFast",      "game": "LAGOFAST",   "offers_attr": "LAGOFAST_OFFERS",   "input_fields": []},
+      "gearup":     {"title": "⚡ GearUP",        "game": "GEARUP",     "offers_attr": "GEARUP_OFFERS",     "input_fields": []},
+      "tgboost":    {"title": "🚀 Telegram Boost","game": "TGBOOST",    "offers_attr": "TGBOOST_OFFERS",    "input_fields": [{"key": "url", "label": "رابط القناة / المجموعة", "type": "url"}]},
+      # ─── تعبئة جوال (مبلغ مفتوح) ───
+      # custom_product_id: اجلب product_id من Fastcard للتعبئة المباشرة
+      "syr_bal": {
+          "title": "📲 رصيد سيريتل", "game": "SYRIATEL",
+          "offers_attr": "SYRIATEL_BALANCE_OFFERS",
+          "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
+          "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
+          "markup_pct": 10, "custom_product_id": 0,
+      },
+      "syr_gas": {
+          "title": "🔥 سيريتل غاز", "game": "SYRIATEL",
+          "offers_attr": "SYRIATEL_GAS_OFFERS",
+          "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
+          "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
+          "markup_pct": 10, "custom_product_id": 0,
+      },
+      "syr_faw": {
+          "title": "🧾 سيريتل فواتير", "game": "SYRIATEL",
+          "offers_attr": "SYRIATEL_FAWATEER_OFFERS",
+          "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
+          "custom_amount": True, "min_amount": 1000, "max_amount": 1000000,
+          "markup_pct": 5, "custom_product_id": 0,
+      },
+      "mtn_bal": {
+          "title": "📲 رصيد MTN", "game": "MTN",
+          "offers_attr": "MTN_BALANCE_OFFERS",
+          "input_fields": [{"key": "phone", "label": "رقم MTN", "type": "phone"}],
+          "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
+          "markup_pct": 10, "custom_product_id": 0,
+      },
+      # ─── رشق SMM ───
+      "smm_igf": {"title": "📸 متابعين إنستغرام", "game": "SMM", "offers_attr": "INSTAGRAM_FOLLOWERS", "input_fields": [{"key": "url", "label": "رابط الحساب",  "type": "url"}]},
+      "smm_igl": {"title": "❤️ لايكات إنستغرام",  "game": "SMM", "offers_attr": "INSTAGRAM_LIKES",    "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
+      "smm_igv": {"title": "👁️ مشاهدات إنستغرام", "game": "SMM", "offers_attr": "INSTAGRAM_VIEWS",   "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
+      "smm_fbf": {"title": "👍 متابعين فيسبوك",    "game": "SMM", "offers_attr": "FACEBOOK_FOLLOWERS", "input_fields": [{"key": "url", "label": "رابط الصفحة",  "type": "url"}]},
+      "smm_tgv": {"title": "📊 مشاهدات تلغرام",   "game": "SMM", "offers_attr": "TELEGRAM_VIEWS",    "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
+      "smm_tgr": {"title": "💯 تفاعل تلغرام",      "game": "SMM", "offers_attr": "TELEGRAM_REACTIONS","input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
+  }
+
+
+  # =============================================================================
+  # ===== دوال مساعدة مطلوبة من handlers_user.py =====
+  # =============================================================================
+
+  def get_fastcard_offer(prefix: str, offer_id: str, custom_offer=None):
+      """يرجع (offer, cat) للعرض المطلوب. يدعم العروض الديناميكية (custom_offer)."""
+      import sys
+      cat = FASTCARD_CATEGORIES.get(prefix)
+      if not cat:
+          return None, None
+      if custom_offer and custom_offer.get("id") == offer_id:
+          return custom_offer, cat
+      offers_attr = cat.get("offers_attr")
+      if not offers_attr:
+          return None, None
+      offers = getattr(sys.modules[__name__], offers_attr, []) or []
+      offer = next((o for o in offers if o.get("id") == offer_id), None)
+      if offer:
+          return offer, cat
+      return None, None
+
+
+  def sanitize_for_storage(data, extra_redact_values=None) -> str:
+      """يحوّل data لـ JSON string آمن للتخزين مع إخفاء القيم الحساسة."""
+      import json
+      try:
+          text = json.dumps(data, ensure_ascii=False, default=str)
+      except Exception:
+          text = str(data)
+      if extra_redact_values:
+          for val in extra_redact_values:
+              v = str(val or "").strip()
+              if len(v) > 2:
+                  text = text.replace(v, "***")
+      return text[:3000]
+
+
+  def mask_field_value(field: dict, value: str) -> str:
+      """يعيد القيمة مخفية إذا كانت كلمة مرور أو حساسة."""
+      if field.get("type") == "password" or field.get("sensitive"):
+          if not value:
+              return "***"
+          if len(value) <= 3:
+              return "***"
+          return value[0] + "*" * (len(value) - 2) + value[-1]
+      return value
+
+
+  def summarize_fields_for_db(fields: list, fc_fields: dict) -> str:
+      """يبني ملخّص آمن للحقول يُخزَّن في عمود player_id بجدول orders."""
+      parts = []
+      for f in fields:
+          v = str(fc_fields.get(f["key"], "") or "").strip()
+          if not v:
+              continue
+          t = f.get("type", "")
+          sensitive = f.get("sensitive") or t == "password"
+          if sensitive:
+              parts.append(f"{f['label']}: ***")
+          elif t == "id":
+              parts.append(f"ID:{v}")
+          elif t == "phone":
+              parts.append(f"📱{v}")
+          elif t == "email":
+              parts.append(v)
+          elif t == "url":
+              parts.append(v)
+          else:
+              parts.append(v)
+      return " | ".join(parts) if parts else "—"
+
+
+  def build_custom_balance_offer(prefix: str, amount: int):
+      """يبني عرض ديناميكي لأقسام الرصيد المفتوح المبلغ.
+      يرجع (offer_dict, None) عند النجاح أو (None, error_msg) عند الفشل.
+      """
+      cat = FASTCARD_CATEGORIES.get(prefix)
+      if not cat or not cat.get("custom_amount"):
+          return None, "قسم غير صالح أو لا يدعم المبلغ المفتوح"
+      product_id = cat.get("custom_product_id", 0)
+      if not product_id:
+          return None, "product_id غير مضبوط — أضفه في FASTCARD_CATEGORIES"
+      markup_pct = int(cat.get("markup_pct", 10))
+      price = int(amount * (1 + markup_pct / 100))
+      offer = {
+          "id": f"custom_{prefix}_{amount}",
+          "label": f'{amount:,} ل.س'.replace(",", "،"),
+          "price": price,
+          "product_id": product_id,
+          "qty": amount,
+          "cost_usd": None,
+          "enabled": True,
+      }
+      return offer, None
+  
