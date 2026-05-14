@@ -2,7 +2,6 @@
 طبقة قاعدة البيانات - SQLite
 """
 import sqlite3
-import os
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -123,22 +122,6 @@ def init_db():
         """)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_ratings_user ON order_ratings(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_ratings_created ON order_ratings(created_at)")
-        # جدول إيداعات USDT المعلّقة (auto-match)
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS usdt_pending_deposits (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                amount_usdt REAL NOT NULL,
-                tx_hash TEXT,
-                amount_syp REAL,
-                status TEXT DEFAULT 'pending',
-                created_at TEXT,
-                expires_at TEXT,
-                matched_at TEXT
-            )
-        """)
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_usdt_pending_user ON usdt_pending_deposits(user_id, status)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_usdt_pending_amount ON usdt_pending_deposits(amount_usdt, status)")
         # جدول كوبونات الخصم
         cur.execute("""
             CREATE TABLE IF NOT EXISTS coupons (
@@ -187,9 +170,6 @@ def init_db():
 
 @contextmanager
 def get_conn():
-    db_dir = os.path.dirname(config.DB_PATH)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(config.DB_PATH)
     conn.row_factory = sqlite3.Row
     try:
@@ -548,7 +528,25 @@ def get_pending_orders(limit: int = 20) -> List[Dict[str, Any]]:
         return [dict(r) for r in cur.fetchall()]
 
 
-def get_pubg_stats_since(since_iso: str) -> Dict[str, Any]:
+
+
+  def get_followup_orders(limit: int = 50) -> List[Dict[str, Any]]:
+      """يرجع الطلبات التي لا تزال بحالة غير محسومة وعندها api_uuid (مرّت عبر API).
+      يُستخدم من job الفحص الدوري لمتابعة الطلبات المعلقة بعد انتهاء وقت الـ polling.
+      الحالات غير المحسومة: pending, processing, wait, unknown, empty string.
+      """
+      unresolved = ("pending", "processing", "wait", "unknown", "")
+      placeholders = ",".join("?" * len(unresolved))
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute(
+              f"SELECT * FROM orders WHERE status IN ({placeholders}) AND api_uuid IS NOT NULL "
+              "ORDER BY id ASC LIMIT ?",
+              (*unresolved, limit),
+          )
+          return [dict(r) for r in cur.fetchall()]
+
+  def get_pubg_stats_since(since_iso: str) -> Dict[str, Any]:
     """إحصائيات مبيعات شدات PUBG التي مرّت عبر الـAPI منذ وقت معيّن (UTC ISO).
     يحسب إجمالي المبالغ بالـ ل.س والتكلفة بالدولار من PUBG_UC_OFFERS."""
     from . import config as _cfg
@@ -1117,142 +1115,3 @@ def all_user_ids() -> List[int]:
         cur = conn.cursor()
         cur.execute("SELECT user_id FROM users WHERE is_banned = 0")
         return [int(r["user_id"]) for r in cur.fetchall()]
-
-
-# ===== إيداعات USDT المعلّقة (auto-match) =====
-
-def create_usdt_pending(user_id: int, amount_usdt: float, expires_minutes: int = 120) -> int:
-    """ينشئ إيداع USDT معلّق للمستخدم. يرجع الـ id."""
-    from datetime import timedelta
-    created = datetime.utcnow()
-    expires = (created + timedelta(minutes=expires_minutes)).isoformat()
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO usdt_pending_deposits "
-            "(user_id, amount_usdt, status, created_at, expires_at) VALUES (?, ?, 'pending', ?, ?)",
-            (user_id, float(amount_usdt), created.isoformat(), expires),
-        )
-        conn.commit()
-        return cur.lastrowid
-
-
-def find_usdt_pending_by_amount(amount_usdt: float, tolerance_pct: float = 0.005) -> Optional[Dict[str, Any]]:
-    """يبحث عن إيداع معلّق يطابق المبلغ (±tolerance). يرجع أقدم واحد أو None.
-    tolerance_pct=0.005 يعني ±0.5%"""
-    low = amount_usdt * (1 - tolerance_pct)
-    high = amount_usdt * (1 + tolerance_pct)
-    now_str = datetime.utcnow().isoformat()
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM usdt_pending_deposits "
-            "WHERE status = 'pending' AND amount_usdt BETWEEN ? AND ? AND expires_at > ? "
-            "ORDER BY created_at ASC LIMIT 1",
-            (low, high, now_str),
-        )
-        row = cur.fetchone()
-        return dict(row) if row else None
-
-
-def match_usdt_pending(pending_id: int, tx_hash: str, amount_syp: float) -> bool:
-    """يُغلق إيداع معلّق كـ matched ويسجّل hash + المبلغ بالليرة. يرجع True لو تم."""
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "UPDATE usdt_pending_deposits SET status = 'matched', tx_hash = ?, "
-            "amount_syp = ?, matched_at = ? "
-            "WHERE id = ? AND status = 'pending'",
-            (tx_hash, float(amount_syp), datetime.utcnow().isoformat(), pending_id),
-        )
-        conn.commit()
-        return cur.rowcount > 0
-
-
-def cancel_usdt_pending(pending_id: int, user_id: int) -> bool:
-    """يلغي إيداع معلّق. يرجع True لو تم (فقط لو ينتمي للمستخدم و pending)."""
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "UPDATE usdt_pending_deposits SET status = 'cancelled' "
-            "WHERE id = ? AND user_id = ? AND status = 'pending'",
-            (pending_id, user_id),
-        )
-        conn.commit()
-        return cur.rowcount > 0
-
-
-def expire_usdt_pending() -> int:
-    """يُغلق كل الإيداعات المنتهية الصلاحية. يرجع عدد ما تم إغلاقه."""
-    now_str = datetime.utcnow().isoformat()
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "UPDATE usdt_pending_deposits SET status = 'expired' "
-            "WHERE status = 'pending' AND expires_at <= ?",
-            (now_str,),
-        )
-        conn.commit()
-        return cur.rowcount
-
-
-def get_usdt_pending(pending_id: int) -> Optional[Dict[str, Any]]:
-    """يجيب إيداع USDT بالـ id."""
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM usdt_pending_deposits WHERE id = ?", (pending_id,))
-        row = cur.fetchone()
-        return dict(row) if row else None
-
-
-def get_user_active_usdt_pending(user_id: int) -> Optional[Dict[str, Any]]:
-    """يرجع آخر إيداع USDT معلّق للمستخدم (غير منتهي الصلاحية) أو None."""
-    now_str = datetime.utcnow().isoformat()
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM usdt_pending_deposits "
-            "WHERE user_id = ? AND status = 'pending' AND expires_at > ? "
-            "ORDER BY created_at DESC LIMIT 1",
-            (user_id, now_str),
-        )
-        row = cur.fetchone()
-        return dict(row) if row else None
-
-
-def get_usdt_recent_deposits(limit: int = 20, status: Optional[str] = None) -> List[Dict[str, Any]]:
-    """يرجع آخر إيداعات USDT مع اسم المستخدم. يدعم فلترة بالحالة."""
-    with get_conn() as conn:
-        cur = conn.cursor()
-        if status:
-            cur.execute(
-                "SELECT d.*, u.username, u.first_name FROM usdt_pending_deposits d "
-                "LEFT JOIN users u ON u.user_id = d.user_id "
-                "WHERE d.status = ? ORDER BY d.created_at DESC LIMIT ?",
-                (status, limit),
-            )
-        else:
-            cur.execute(
-                "SELECT d.*, u.username, u.first_name FROM usdt_pending_deposits d "
-                "LEFT JOIN users u ON u.user_id = d.user_id "
-                "ORDER BY d.created_at DESC LIMIT ?",
-                (limit,),
-            )
-        return [dict(r) for r in cur.fetchall()]
-
-
-def get_usdt_stats() -> Dict[str, Any]:
-    """إحصائيات إيداعات USDT: الإجمالي، الناجحة، المعلّقة، المنتهية."""
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT status, COUNT(*) AS c, COALESCE(SUM(amount_usdt),0) AS total_usdt, COALESCE(SUM(amount_syp),0) AS total_syp FROM usdt_pending_deposits GROUP BY status")
-        rows = cur.fetchall()
-    result: Dict[str, Any] = {"matched": {"count": 0, "usdt": 0.0, "syp": 0.0},
-                               "pending": {"count": 0, "usdt": 0.0, "syp": 0.0},
-                               "expired": {"count": 0, "usdt": 0.0, "syp": 0.0},
-                               "cancelled": {"count": 0, "usdt": 0.0, "syp": 0.0}}
-    for r in rows:
-        s = r["status"]
-        if s in result:
-            result[s] = {"count": int(r["c"]), "usdt": float(r["total_usdt"]), "syp": float(r["total_syp"])}
-    return result
