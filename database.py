@@ -1097,3 +1097,15 @@ def all_user_ids() -> List[int]:
         cur = conn.cursor()
         cur.execute("SELECT user_id FROM users WHERE is_banned = 0")
         return [int(r["user_id"]) for r in cur.fetchall()]
+def get_followup_orders(limit: int = 50) -> List[Dict[str, Any]]:
+    """يرجع الطلبات التي لا تزال بحالة غير محسومة وعندها api_uuid (مرّت عبر API)."""
+    unresolved = ("pending", "processing", "wait", "unknown", "")
+    placeholders = ",".join("?" * len(unresolved))
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            f"SELECT * FROM orders WHERE status IN ({placeholders}) AND api_uuid IS NOT NULL "
+            "ORDER BY id ASC LIMIT ?",
+            (*unresolved, limit),
+        )
+        return [dict(r) for r in cur.fetchall()]
