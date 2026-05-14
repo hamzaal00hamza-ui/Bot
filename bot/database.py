@@ -1097,21 +1097,21 @@ def is_transaction_consumed(transaction_id: int) -> bool:
 
 def consume_transaction(transaction_id: int, user_id: int, amount: float) -> bool:
     """Atomically claim a transaction. Returns True if claimed, False if already consumed."""
-    try:
-        with get_conn() as conn:
-            cur = conn.cursor()
-            cur.execute(
-                "INSERT INTO consumed_transactions (transaction_id, user_id, amount, consumed_at) VALUES (?, ?, ?, ?)",
-                (transaction_id, user_id, amount, now_iso()),
-            )
-            conn.commit()
-            return True
-    except sqlite3.IntegrityError:
-        return False
+  try:
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute(
+              "INSERT INTO consumed_transactions (transaction_id, user_id, amount, consumed_at) VALUES (?, ?, ?, ?)",
+              (transaction_id, user_id, amount, now_iso()),
+          )
+          conn.commit()
+          return True
+  except sqlite3.IntegrityError:
+      return False
 
 
 def all_user_ids() -> List[int]:
-    with get_conn() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT user_id FROM users WHERE is_banned = 0")
-        return [int(r["user_id"]) for r in cur.fetchall()]
+  with get_conn() as conn:
+      cur = conn.cursor()
+      cur.execute("SELECT user_id FROM users WHERE is_banned = 0")
+      return [int(r["user_id"]) for r in cur.fetchall()]
