@@ -166,20 +166,20 @@ def init_db():
             new_level = config.get_level_for_amount(float(u["total_recharged"] or 0))
             cur.execute("UPDATE users SET level = ? WHERE user_id = ?", (new_level, u["user_id"]))
         # جدول عروض Fastcard (تُدار عبر لوحة الأدمن)
-          cur.execute("""
-              CREATE TABLE IF NOT EXISTS fc_offers (
-                  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                  prefix      TEXT NOT NULL,
-                  offer_id    TEXT NOT NULL,
-                  label       TEXT NOT NULL,
-                  price_syp   INTEGER NOT NULL,
-                  product_id  TEXT NOT NULL,
-                  position    INTEGER DEFAULT 0,
-                  created_at  TEXT,
-                  UNIQUE(prefix, offer_id)
-              )
-          """)
-          cur.execute("CREATE INDEX IF NOT EXISTS idx_fc_offers_prefix ON fc_offers(prefix, position)")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS fc_offers (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                prefix      TEXT NOT NULL,
+                offer_id    TEXT NOT NULL,
+                label       TEXT NOT NULL,
+                price_syp   INTEGER NOT NULL,
+                product_id  TEXT NOT NULL,
+                position    INTEGER DEFAULT 0,
+                created_at  TEXT,
+                UNIQUE(prefix, offer_id)
+            )
+        """)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_fc_offers_prefix ON fc_offers(prefix, position)")
         conn.commit()
 
 
