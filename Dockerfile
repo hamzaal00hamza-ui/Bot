@@ -1,16 +1,17 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+  WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+  COPY requirements.txt .
+  RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+  COPY . .
 
-RUN mkdir -p /data
+  RUN mkdir -p /data && chmod 777 /data
 
-ENV DB_PATH=/data/database.db
-ENV PORT=8080
-ENV PYTHONUNBUFFERED=1
+  ENV DB_PATH=/data/database.db
+  ENV PORT=8080
+  ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "-m", "bot.main"]
+  CMD ["python", "-m", "bot.main"]
+  
