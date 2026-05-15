@@ -409,406 +409,283 @@ def get_level_for_amount(total_recharged: float) -> str:
 
 
 # =============================================================================
-# ===== الإضافة المطلوبة: دوال مساعدة + FASTCARD_CATEGORIES + قوائم المنتجات =====
-# =============================================================================
 
-# ─── قوائم منتجات ببجي وفري فاير ───
-PUBG_MEMBERSHIPS = [
-    # مثال: {"id": "pm_1", "label": "Royal Pass شهر", "price": 25000, "product_id": 0, "cost_usd": 1.5}
-    # ← ضع هنا المنتجات من لوحة Fastcard مع product_id الصحيح
-]
+  # =============================================================================
+  # قوائم العروض — أضف product_id من لوحة Fastcard لكل عرض
+  # =============================================================================
 
-PUBG_CODES = [
-    # مثال: {"id": "pc_1", "label": "كود 60 شدة", "price": 15000, "product_id": 0, "cost_usd": 0.9}
-]
+  # ───── ببجي موبايل ─────
+  PUBG_MEMBERSHIPS: list = []   # عضويات ببجي
+  PUBG_CODE_OFFERS: list = []   # أكواد شدات ببجي
 
-FREEFIRE_DIAMOND_OFFERS = [
-    # مثال: {"id": "ff_100", "label": "100 جوهرة", "price": 8000, "product_id": 0, "cost_usd": 0.5}
-]
+  # ───── فري فاير ─────
+  FREEFIRE_MEMBERSHIPS: list = []   # عضويات فري فاير
+  FREEFIRE_CODE_OFFERS: list = []   # أكواد فري فاير
 
-FREEFIRE_MEMBERSHIPS = []
-FREEFIRE_CODES = []
+  # ───── ألعاب Supercell ─────
+  BRAWL_STARS_OFFERS:      list = []
+  CLASH_OF_CLANS_OFFERS:   list = []
+  CLASH_ROYALE_OFFERS:     list = []
+  HAY_DAY_OFFERS:          list = []
 
-# ─── Supercell ───
-BRAWL_STARS_OFFERS = []
-CLASH_OF_CLANS_OFFERS = []
-CLASH_ROYALE_OFFERS = []
-HAY_DAY_OFFERS = []
+  # ───── كول أوف ديوتي ─────
+  COD_OFFERS:  list = []   # شدات COD
+  COD_BP_OFFERS: list = []  # Battle Pass
 
-# ─── ألعاب أخرى ───
-COD_OFFERS = []
-COD_PASS_OFFERS = []
-DELTA_FORCE_OFFERS = []
-MINECRAFT_OFFERS = []
-FORTNITE_OFFERS = []
-LUDO_WORLD_OFFERS = []
-LUDO_CLUB_OFFERS = []
-LUDO_YALLA_OFFERS = []
+  # ───── ألعاب أخرى ─────
+  DELTA_FORCE_OFFERS: list = []
+  MINECRAFT_OFFERS:   list = []
+  FORTNITE_OFFERS:    list = []
 
-# ─── بطاقات (أكواد) ───
-PSN_US_OFFERS = []
-PSN_SA_OFFERS = []
-PSN_LB_OFFERS = []
-PSN_AE_OFFERS = []
-STEAM_US_OFFERS = []
-STEAM_SA_OFFERS = []
-STEAM_TR_OFFERS = []
-ITUNES_US_OFFERS = []
-ITUNES_SA_OFFERS = []
-ITUNES_UK_OFFERS = []
-GPLAY_US_OFFERS = []
-GPLAY_SA_OFFERS = []
-GPLAY_TR_OFFERS = []
-XBOX_US_OFFERS = []
-XBOX_SA_OFFERS = []
-RAZER_GL_OFFERS = []
-RAZER_US_OFFERS = []
-RAZER_TR_OFFERS = []
-NINTENDO_OFFERS = []
-NETFLIX_OFFERS = []
-VISA_OFFERS = []
+  # ───── ألعاب لودو ─────
+  LUDO_WORLD_OFFERS:  list = []
+  LUDO_CLUB_OFFERS:   list = []
+  YALLA_LUDO_OFFERS:  list = []
 
-# ─── اشتراكات ───
-SHAHID_OFFERS = []
-YOUTUBE_OFFERS = []
-ANGHAMI_OFFERS = []
-OSN_OFFERS = []
-CHATGPT_OFFERS = []
-CANVA_OFFERS = []
-SNAPCHAT_OFFERS = []
-NORDVPN_OFFERS = []
-EXPRESSVPN_OFFERS = []
-LAGOFAST_OFFERS = []
-GEARUP_OFFERS = []
-TGBOOST_OFFERS = []
+  # ───── بطاقات ─────
+  NINTENDO_US_OFFERS: list = []
+  NETFLIX_OFFERS:     list = []
+  VISA_OFFERS:        list = []
+  PSN_US_OFFERS: list = []
+  PSN_SA_OFFERS: list = []
+  PSN_LB_OFFERS: list = []
+  PSN_AE_OFFERS: list = []
+  STEAM_US_OFFERS: list = []
+  STEAM_SA_OFFERS: list = []
+  STEAM_TR_OFFERS: list = []
+  ITUNES_US_OFFERS: list = []
+  ITUNES_SA_OFFERS: list = []
+  ITUNES_UK_OFFERS: list = []
+  GPLAY_US_OFFERS: list = []
+  GPLAY_SA_OFFERS: list = []
+  GPLAY_TR_OFFERS: list = []
+  XBOX_US_OFFERS: list = []
+  XBOX_SA_OFFERS: list = []
+  RAZER_GL_OFFERS: list = []
+  RAZER_US_OFFERS: list = []
+  RAZER_TR_OFFERS: list = []
 
-# ─── تعبئة جوال ───
-SYRIATEL_BALANCE_OFFERS = []
-SYRIATEL_GAS_OFFERS = []
-SYRIATEL_FAWATEER_OFFERS = []
-SYRIATEL_CASH_OFFERS = []
-MTN_BALANCE_OFFERS = []
-MTN_GAS_OFFERS = []
-MTN_FAWATEER_OFFERS = []
-MTN_CASH_OFFERS = []
-SHAMCASH_BAL_OFFERS = []
-PAYEER_OFFERS = []
-PERFECTMONEY_OFFERS = []
-PAYONEER_OFFERS = []
-CLIQ_JORDAN_OFFERS = []
-USDT_TRC20_OFFERS = []
-USDT_BEP20_OFFERS = []
-TOUCH_OFFERS = []
-ALFA_OFFERS = []
-WHISH_OFFERS = []
-ASIACELL_OFFERS = []
-ZAIN_IRAQ_OFFERS = []
-TURKCELL_OFFERS = []
-TOSLA_OFFERS = []
-OLDUBIL_OFFERS = []
-VODAFONE_CASH_OFFERS = []
-RCELL_OFFERS = []
-SELAM_TELECOM_OFFERS = []
+  # ───── اشتراكات ─────
+  SHAHID_OFFERS:        list = []
+  YOUTUBE_OFFERS:       list = []
+  ANGHAMI_OFFERS:       list = []
+  OSN_OFFERS:           list = []
+  CHATGPT_OFFERS:       list = []
+  CANVA_OFFERS:         list = []
+  SNAPCHAT_OFFERS:      list = []
+  NORDVPN_OFFERS:       list = []
+  EXPRESSVPN_OFFERS:    list = []
+  LAGOFAST_OFFERS:      list = []
+  GEARUP_OFFERS:        list = []
+  TELEGRAM_BOOST_OFFERS: list = []
 
-# ─── رشق (SMM) ───
-INSTAGRAM_FOLLOWERS = []
-INSTAGRAM_LIKES = []
-INSTAGRAM_VIEWS = []
-FACEBOOK_FOLLOWERS = []
-TELEGRAM_VIEWS = []
-TELEGRAM_REACTIONS = []
+  # ───── خدمات رشق (SMM) ─────
+  IGF_OFFERS: list = []   # متابعين انستغرام
+  IGL_OFFERS: list = []   # لايكات انستغرام
+  IGV_OFFERS: list = []   # مشاهدات انستغرام
+  FBF_OFFERS: list = []   # متابعين فيسبوك
+  TGV_OFFERS: list = []   # مشاهدات تلغرام
+  TGR_OFFERS: list = []   # تفاعل تلغرام
 
 
-# =============================================================================
-# ===== FASTCARD_CATEGORIES: خريطة كل الأقسام التلقائية =====
-# =============================================================================
-# كل قسم يحتاج:
-#   title       → الاسم الظاهر للمستخدم
-#   game        → اللعبة/الخدمة (للتسجيل في DB)
-#   offers_attr → اسم قائمة المنتجات أعلاه
-#   input_fields→ الحقول المطلوبة من المستخدم (قائمة)
-#   custom_amount (اختياري) → True للأقسام المفتوحة المبلغ مثل تعبئة الجوال
+  # =============================================================================
+  # FASTCARD_CATEGORIES — المفاتيح مطابقة تماماً لـ handlers_user.py و keyboards.py
+  # =============================================================================
+  def _f(title, attr, fields=None, back="menu:store"):
+      return {"title": title, "offers_attr": attr,
+              "input_fields": fields or [], "back_callback": back}
 
-FASTCARD_CATEGORIES = {
-    # ─── ببجي عضويات وأكواد ───
-    "pm": {
-        "title": "👑 ببجي موبايل — عضويات",
-        "game": "PUBG",
-        "offers_attr": "PUBG_MEMBERSHIPS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    "pc": {
-        "title": "🎟️ ببجي موبايل — أكواد شدات",
-        "game": "PUBG",
-        "offers_attr": "PUBG_CODES",
-        "input_fields": [],
-    },
-    # ─── فري فاير ───
-    "fm": {
-        "title": "👑 فري فاير — عضويات",
-        "game": "FREEFIRE",
-        "offers_attr": "FREEFIRE_MEMBERSHIPS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    "fc": {
-        "title": "🎟️ فري فاير — أكواد جواهر",
-        "game": "FREEFIRE",
-        "offers_attr": "FREEFIRE_CODES",
-        "input_fields": [],
-    },
-    # ─── Supercell (إيميل + باسورد) ───
-    "bs": {
-        "title": "⭐ Brawl Stars",
-        "game": "BRAWL_STARS",
-        "offers_attr": "BRAWL_STARS_OFFERS",
-        "input_fields": [
-            {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
-            {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
-        ],
-    },
-    "coc": {
-        "title": "🏰 Clash of Clans",
-        "game": "COC",
-        "offers_attr": "CLASH_OF_CLANS_OFFERS",
-        "input_fields": [
-            {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
-            {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
-        ],
-    },
-    "cr": {
-        "title": "👑 Clash Royale",
-        "game": "CLASH_ROYALE",
-        "offers_attr": "CLASH_ROYALE_OFFERS",
-        "input_fields": [
-            {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
-            {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
-        ],
-    },
-    "hd": {
-        "title": "🌾 Hay Day",
-        "game": "HAY_DAY",
-        "offers_attr": "HAY_DAY_OFFERS",
-        "input_fields": [
-            {"key": "email",    "label": "إيميل Supercell ID",      "type": "email"},
-            {"key": "password", "label": "كلمة مرور Supercell ID", "type": "password", "sensitive": True},
-        ],
-    },
-    # ─── COD ───
-    "cod": {
-        "title": "🔫 Call of Duty",
-        "game": "COD",
-        "offers_attr": "COD_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID / UID", "type": "id"}],
-    },
-    "cdbp": {
-        "title": "🎟️ COD Battle Pass",
-        "game": "COD",
-        "offers_attr": "COD_PASS_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID / UID", "type": "id"}],
-    },
-    # ─── ألعاب أخرى ───
-    "df": {
-        "title": "💥 Delta Force",
-        "game": "DELTA_FORCE",
-        "offers_attr": "DELTA_FORCE_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    "mc": {
-        "title": "⛏️ Minecraft",
-        "game": "MINECRAFT",
-        "offers_attr": "MINECRAFT_OFFERS",
-        "input_fields": [{"key": "email", "label": "إيميل Minecraft", "type": "email"}],
-    },
-    "fn": {
-        "title": "🎯 Fortnite",
-        "game": "FORTNITE",
-        "offers_attr": "FORTNITE_OFFERS",
-        "input_fields": [{"key": "email", "label": "إيميل Epic Games", "type": "email"}],
-    },
-    "lw": {
-        "title": "🎲 Ludo World",
-        "game": "LUDO",
-        "offers_attr": "LUDO_WORLD_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    "lc": {
-        "title": "🎲 Ludo Club",
-        "game": "LUDO",
-        "offers_attr": "LUDO_CLUB_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    "yl": {
-        "title": "🎲 Ludo Yalla",
-        "game": "LUDO",
-        "offers_attr": "LUDO_YALLA_OFFERS",
-        "input_fields": [{"key": "playerId", "label": "Player ID", "type": "id"}],
-    },
-    # ─── بطاقات (أكواد جاهزة، بدون إدخال) ───
-    "psn_us":   {"title": "🎮 PSN (US)",         "game": "PSN",     "offers_attr": "PSN_US_OFFERS",    "input_fields": []},
-    "psn_sa":   {"title": "🎮 PSN (SA)",         "game": "PSN",     "offers_attr": "PSN_SA_OFFERS",    "input_fields": []},
-    "psn_lb":   {"title": "🎮 PSN (LB)",         "game": "PSN",     "offers_attr": "PSN_LB_OFFERS",    "input_fields": []},
-    "psn_ae":   {"title": "🎮 PSN (AE)",         "game": "PSN",     "offers_attr": "PSN_AE_OFFERS",    "input_fields": []},
-    "steam_us": {"title": "🟦 Steam (US)",       "game": "STEAM",   "offers_attr": "STEAM_US_OFFERS",  "input_fields": []},
-    "steam_sa": {"title": "🟦 Steam (SA)",       "game": "STEAM",   "offers_attr": "STEAM_SA_OFFERS",  "input_fields": []},
-    "steam_tr": {"title": "🟦 Steam (TR)",       "game": "STEAM",   "offers_attr": "STEAM_TR_OFFERS",  "input_fields": []},
-    "itunes_us":{"title": "🍎 iTunes (US)",      "game": "ITUNES",  "offers_attr": "ITUNES_US_OFFERS", "input_fields": []},
-    "itunes_sa":{"title": "🍎 iTunes (SA)",      "game": "ITUNES",  "offers_attr": "ITUNES_SA_OFFERS", "input_fields": []},
-    "itunes_uk":{"title": "🍎 iTunes (UK)",      "game": "ITUNES",  "offers_attr": "ITUNES_UK_OFFERS", "input_fields": []},
-    "gplay_us": {"title": "🤖 Google Play (US)", "game": "GPLAY",   "offers_attr": "GPLAY_US_OFFERS",  "input_fields": []},
-    "gplay_sa": {"title": "🤖 Google Play (SA)", "game": "GPLAY",   "offers_attr": "GPLAY_SA_OFFERS",  "input_fields": []},
-    "gplay_tr": {"title": "🤖 Google Play (TR)", "game": "GPLAY",   "offers_attr": "GPLAY_TR_OFFERS",  "input_fields": []},
-    "xbox_us":  {"title": "🟩 Xbox (US)",        "game": "XBOX",    "offers_attr": "XBOX_US_OFFERS",   "input_fields": []},
-    "xbox_sa":  {"title": "🟩 Xbox (SA)",        "game": "XBOX",    "offers_attr": "XBOX_SA_OFFERS",   "input_fields": []},
-    "razer_gl": {"title": "💚 Razer Gold (GL)",  "game": "RAZER",   "offers_attr": "RAZER_GL_OFFERS",  "input_fields": []},
-    "razer_us": {"title": "💚 Razer Gold (US)",  "game": "RAZER",   "offers_attr": "RAZER_US_OFFERS",  "input_fields": []},
-    "razer_tr": {"title": "💚 Razer Gold (TR)",  "game": "RAZER",   "offers_attr": "RAZER_TR_OFFERS",  "input_fields": []},
-    "nintendo": {"title": "🎮 Nintendo",         "game": "NINTENDO","offers_attr": "NINTENDO_OFFERS",  "input_fields": []},
-    "netflix":  {"title": "🎬 Netflix",          "game": "NETFLIX", "offers_attr": "NETFLIX_OFFERS",   "input_fields": []},
-    "visa":     {"title": "💳 Visa",             "game": "VISA",    "offers_attr": "VISA_OFFERS",      "input_fields": []},
-    # ─── اشتراكات ───
-    "shahid":     {"title": "📺 Shahid",        "game": "SHAHID",     "offers_attr": "SHAHID_OFFERS",     "input_fields": [{"key": "email", "label": "الإيميل / يوزر", "type": "email"}]},
-    "youtube":    {"title": "▶️ YouTube",       "game": "YOUTUBE",    "offers_attr": "YOUTUBE_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل جوجل",     "type": "email"}]},
-    "anghami":    {"title": "🎵 Anghami",       "game": "ANGHAMI",    "offers_attr": "ANGHAMI_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل Anghami", "type": "email"}]},
-    "osn":        {"title": "📺 OSN+",          "game": "OSN",        "offers_attr": "OSN_OFFERS",        "input_fields": [{"key": "email", "label": "إيميل OSN",     "type": "email"}]},
-    "chatgpt":    {"title": "🤖 ChatGPT",       "game": "CHATGPT",    "offers_attr": "CHATGPT_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل OpenAI",  "type": "email"}]},
-    "canva":      {"title": "🎨 Canva Pro",     "game": "CANVA",      "offers_attr": "CANVA_OFFERS",      "input_fields": [{"key": "email", "label": "إيميل Canva",   "type": "email"}]},
-    "snapchat":   {"title": "👻 Snapchat+",     "game": "SNAPCHAT",   "offers_attr": "SNAPCHAT_OFFERS",   "input_fields": [{"key": "phone", "label": "رقم الجوال",    "type": "phone"}]},
-    "nordvpn":    {"title": "🛡️ NordVPN",      "game": "NORDVPN",    "offers_attr": "NORDVPN_OFFERS",    "input_fields": [{"key": "email", "label": "إيميل NordVPN", "type": "email"}]},
-    "expressvpn": {"title": "🛡️ ExpressVPN",   "game": "EXPRESSVPN", "offers_attr": "EXPRESSVPN_OFFERS", "input_fields": [{"key": "email", "label": "إيميل ExpressVPN", "type": "email"}]},
-    "lagofast":   {"title": "⚡ LagoFast",      "game": "LAGOFAST",   "offers_attr": "LAGOFAST_OFFERS",   "input_fields": []},
-    "gearup":     {"title": "⚡ GearUP",        "game": "GEARUP",     "offers_attr": "GEARUP_OFFERS",     "input_fields": []},
-    "tgboost":    {"title": "🚀 Telegram Boost","game": "TGBOOST",    "offers_attr": "TGBOOST_OFFERS",    "input_fields": [{"key": "url", "label": "رابط القناة / المجموعة", "type": "url"}]},
-    # ─── تعبئة جوال (مبلغ مفتوح) ───
-    # custom_product_id: اجلب product_id من Fastcard للتعبئة المباشرة
-    "syr_bal": {
-        "title": "📲 رصيد سيريتل", "game": "SYRIATEL",
-        "offers_attr": "SYRIATEL_BALANCE_OFFERS",
-        "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
-        "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
-        "markup_pct": 10, "custom_product_id": 0,
-    },
-    "syr_gas": {
-        "title": "🔥 سيريتل غاز", "game": "SYRIATEL",
-        "offers_attr": "SYRIATEL_GAS_OFFERS",
-        "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
-        "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
-        "markup_pct": 10, "custom_product_id": 0,
-    },
-    "syr_faw": {
-        "title": "🧾 سيريتل فواتير", "game": "SYRIATEL",
-        "offers_attr": "SYRIATEL_FAWATEER_OFFERS",
-        "input_fields": [{"key": "phone", "label": "رقم سيريتل", "type": "phone"}],
-        "custom_amount": True, "min_amount": 1000, "max_amount": 1000000,
-        "markup_pct": 5, "custom_product_id": 0,
-    },
-    "mtn_bal": {
-        "title": "📲 رصيد MTN", "game": "MTN",
-        "offers_attr": "MTN_BALANCE_OFFERS",
-        "input_fields": [{"key": "phone", "label": "رقم MTN", "type": "phone"}],
-        "custom_amount": True, "min_amount": 1000, "max_amount": 500000,
-        "markup_pct": 10, "custom_product_id": 0,
-    },
-    # ─── رشق SMM ───
-    "smm_igf": {"title": "📸 متابعين إنستغرام", "game": "SMM", "offers_attr": "INSTAGRAM_FOLLOWERS", "input_fields": [{"key": "url", "label": "رابط الحساب",  "type": "url"}]},
-    "smm_igl": {"title": "❤️ لايكات إنستغرام",  "game": "SMM", "offers_attr": "INSTAGRAM_LIKES",    "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
-    "smm_igv": {"title": "👁️ مشاهدات إنستغرام", "game": "SMM", "offers_attr": "INSTAGRAM_VIEWS",   "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
-    "smm_fbf": {"title": "👍 متابعين فيسبوك",    "game": "SMM", "offers_attr": "FACEBOOK_FOLLOWERS", "input_fields": [{"key": "url", "label": "رابط الصفحة",  "type": "url"}]},
-    "smm_tgv": {"title": "📊 مشاهدات تلغرام",   "game": "SMM", "offers_attr": "TELEGRAM_VIEWS",    "input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
-    "smm_tgr": {"title": "💯 تفاعل تلغرام",      "game": "SMM", "offers_attr": "TELEGRAM_REACTIONS","input_fields": [{"key": "url", "label": "رابط المنشور", "type": "url"}]},
-}
+  def _id_f():
+      return [{"key": "player_id", "label": "Player ID", "type": "id"}]
+
+  def _sc_f():
+      return [{"key": "email", "label": "إيميل Supercell", "type": "text"},
+              {"key": "password", "label": "كلمة مرور", "type": "password"}]
+
+  def _cod_f():
+      return [{"key": "player_id", "label": "Player ID", "type": "id"},
+              {"key": "email", "label": "الإيميل", "type": "text"},
+              {"key": "whatsapp", "label": "واتساب", "type": "text"}]
+
+  def _smm_f():
+      return [{"key": "link", "label": "رابط الحساب/المنشور", "type": "text"}]
+
+  def _bal(title, product_id="", markup=10, min_a=1000, max_a=5000000, back="store:balance"):
+      return {"title": title, "custom_amount": True, "product_id": product_id,
+              "markup_pct": markup, "min_amount": min_a, "max_amount": max_a,
+              "back_callback": back,
+              "input_fields": [{"key": "number", "label": "الرقم / الحساب", "type": "text"}]}
+
+  FASTCARD_CATEGORIES: dict = {
+      # ─── ببجي موبايل ───
+      "pm":  _f("👑 ببجي — عضويات",       "PUBG_MEMBERSHIPS",   back="store:pubg"),
+      "pc":  _f("🎟️ ببجي — أكواد شدات",   "PUBG_CODE_OFFERS",   back="store:pubg"),
+
+      # ─── فري فاير ───
+      "fm":  _f("👑 فري فاير — عضويات",   "FREEFIRE_MEMBERSHIPS", back="store:freefire"),
+      "fc":  _f("🎟️ فري فاير — أكواد",    "FREEFIRE_CODE_OFFERS", back="store:freefire"),
+
+      # ─── Supercell ───
+      "bs":  _f("🎮 Brawl Stars",  "BRAWL_STARS_OFFERS",    fields=_sc_f(), back="store:supercell"),
+      "coc": _f("🏰 Clash of Clans","CLASH_OF_CLANS_OFFERS", fields=_sc_f(), back="store:supercell"),
+      "cr":  _f("👑 Clash Royale", "CLASH_ROYALE_OFFERS",   fields=_sc_f(), back="store:supercell"),
+      "hd":  _f("🌾 Hay Day",      "HAY_DAY_OFFERS",        fields=_sc_f(), back="store:supercell"),
+
+      # ─── كول أوف ديوتي ───
+      "cod":  _f("💎 COD — شدات",        "COD_OFFERS",    fields=_cod_f(), back="store:cod"),
+      "cdbp": _f("🎫 COD — Battle Pass", "COD_BP_OFFERS", fields=_id_f(),  back="store:cod"),
+
+      # ─── ألعاب أخرى ───
+      "df": _f("🪖 Delta Force",  "DELTA_FORCE_OFFERS", fields=_id_f(), back="store:games"),
+      "mc": _f("⛏️ Minecraft",    "MINECRAFT_OFFERS",   back="store:games"),
+      "fn": _f("🎮 Fortnite",     "FORTNITE_OFFERS",    back="store:games"),
+
+      # ─── لودو ───
+      "lw": _f("🎲 Ludo World", "LUDO_WORLD_OFFERS", fields=_id_f(), back="store:ludo"),
+      "lc": _f("🎲 Ludo Club",  "LUDO_CLUB_OFFERS",  fields=_id_f(), back="store:ludo"),
+      "yl": _f("🎲 Yalla Ludo", "YALLA_LUDO_OFFERS", fields=_id_f(), back="store:ludo"),
+
+      # ─── بطاقات (أكواد جاهزة) ───
+      "nt_us": _f("🎮 Nintendo US",     "NINTENDO_US_OFFERS", back="store:cards"),
+      "nflx":  _f("📺 Netflix",         "NETFLIX_OFFERS",     back="store:cards"),
+      "vs":    _f("💳 VISA",            "VISA_OFFERS",        back="store:cards"),
+      "ps_us": _f("🎮 PSN أمريكي",     "PSN_US_OFFERS",      back="cards:psn"),
+      "ps_sa": _f("🎮 PSN سعودي",      "PSN_SA_OFFERS",      back="cards:psn"),
+      "ps_lb": _f("🎮 PSN لبناني",     "PSN_LB_OFFERS",      back="cards:psn"),
+      "ps_ae": _f("🎮 PSN إماراتي",    "PSN_AE_OFFERS",      back="cards:psn"),
+      "st_us": _f("🚂 Steam أمريكي",   "STEAM_US_OFFERS",    back="cards:steam"),
+      "st_sa": _f("🚂 Steam سعودي",    "STEAM_SA_OFFERS",    back="cards:steam"),
+      "st_tr": _f("🚂 Steam تركي",     "STEAM_TR_OFFERS",    back="cards:steam"),
+      "it_us": _f("🍎 iTunes أمريكي",  "ITUNES_US_OFFERS",   back="cards:itunes"),
+      "it_sa": _f("🍎 iTunes سعودي",   "ITUNES_SA_OFFERS",   back="cards:itunes"),
+      "it_uk": _f("🍎 iTunes بريطاني", "ITUNES_UK_OFFERS",   back="cards:itunes"),
+      "gp_us": _f("📱 Google Play US",  "GPLAY_US_OFFERS",    back="cards:gplay"),
+      "gp_sa": _f("📱 Google Play SA",  "GPLAY_SA_OFFERS",    back="cards:gplay"),
+      "gp_tr": _f("📱 Google Play TR",  "GPLAY_TR_OFFERS",    back="cards:gplay"),
+      "xb_us": _f("🎮 Xbox أمريكي",   "XBOX_US_OFFERS",     back="cards:xbox"),
+      "xb_sa": _f("🎮 Xbox سعودي",    "XBOX_SA_OFFERS",     back="cards:xbox"),
+      "rz_gl": _f("🟢 Razer عالمي",   "RAZER_GL_OFFERS",    back="cards:razer"),
+      "rz_us": _f("🟢 Razer أمريكي",  "RAZER_US_OFFERS",    back="cards:razer"),
+      "rz_tr": _f("🟢 Razer تركي",    "RAZER_TR_OFFERS",    back="cards:razer"),
+
+      # ─── اشتراكات ───
+      "sh":   _f("📺 Shahid VIP",        "SHAHID_OFFERS",        back="store:subs"),
+      "yt":   _f("📹 YouTube Premium",   "YOUTUBE_OFFERS",       back="store:subs"),
+      "an":   _f("🎵 Anghami Plus",      "ANGHAMI_OFFERS",       back="store:subs"),
+      "osn":  _f("🍿 OSN+",             "OSN_OFFERS",           back="store:subs"),
+      "gpt":  _f("🤖 ChatGPT Plus",      "CHATGPT_OFFERS",       back="store:subs"),
+      "cv":   _f("🎨 Canva Pro",         "CANVA_OFFERS",         back="store:subs"),
+      "snap": _f("👻 Snapchat+",         "SNAPCHAT_OFFERS",      back="store:subs"),
+      "nv":   _f("🛡️ NordVPN",          "NORDVPN_OFFERS",       back="store:subs"),
+      "ev":   _f("🟦 ExpressVPN",        "EXPRESSVPN_OFFERS",    back="store:subs"),
+      "lv":   _f("⚡ LagoFast",          "LAGOFAST_OFFERS",      back="store:subs"),
+      "gu":   _f("🚀 GearUP Booster",    "GEARUP_OFFERS",        back="store:subs"),
+      "tg":   _f("📢 تعزيز تلغرام",     "TELEGRAM_BOOST_OFFERS",back="store:subs"),
+
+      # ─── SMM ───
+      "igf": _f("📸 متابعين انستغرام", "IGF_OFFERS", fields=_smm_f(), back="store:smm"),
+      "igl": _f("❤️ لايكات انستغرام",  "IGL_OFFERS", fields=_smm_f(), back="store:smm"),
+      "igv": _f("👁️ مشاهدات انستغرام", "IGV_OFFERS", fields=_smm_f(), back="store:smm"),
+      "fbf": _f("👍 متابعين فيسبوك",   "FBF_OFFERS", fields=_smm_f(), back="store:smm"),
+      "tgv": _f("📊 مشاهدات تلغرام",  "TGV_OFFERS", fields=_smm_f(), back="store:smm"),
+      "tgr": _f("💯 تفاعل تلغرام",    "TGR_OFFERS", fields=_smm_f(), back="store:smm"),
+
+      # ─── رصيد / تعبئة جوال ───
+      "bal_syr":    _bal("📱 رصيد SYRIATEL"),
+      "bal_mtn":    _bal("📱 رصيد MTN"),
+      "bal_sgas":   _bal("⛽ كازية SYRIATEL"),
+      "bal_mgas":   _bal("⛽ كازية MTN"),
+      "bal_sfaw":   _bal("🧾 فواتير SYRIATEL"),
+      "bal_mfaw":   _bal("🧾 فواتير MTN"),
+      "bal_scash":  _bal("💵 SYRIATEL CASH"),
+      "bal_mcash":  _bal("💵 MTN CASH"),
+      "bal_sham":   _bal("💳 SHAM CASH"),
+      "bal_payeer": _bal("🟢 PAYEER"),
+      "bal_pm":     _bal("🟡 Perfect Money"),
+      "bal_payo":   _bal("🟠 Payoneer"),
+      "bal_cliq":   _bal("🏦 CLIQ Jordan"),
+      "bal_trc":    _bal("₮ USDT TRC20"),
+      "bal_bep":    _bal("₮ USDT BEP20"),
+      "bal_touch":  _bal("🇱🇧 Touch"),
+      "bal_alfa":   _bal("🇱🇧 Alfa"),
+      "bal_whish":  _bal("🇱🇧 Whish Money"),
+      "bal_asia":   _bal("🇮🇶 Asia Cell"),
+      "bal_zain":   _bal("🇮🇶 Zain Iraq"),
+      "bal_turk":   _bal("🇹🇷 Turkcell"),
+      "bal_tosla":  _bal("🇹🇷 TOSLA"),
+      "bal_oldu":   _bal("🇹🇷 Oldubil"),
+      "bal_voda":   _bal("🇪🇬 Vodafone Cash"),
+      "bal_rcell":  _bal("📱 R-Cell"),
+      "bal_selam":  _bal("📱 Selam Telecom"),
+      "bal_papra":  _bal("💳 PAPRA"),
+  }
 
 
-# =============================================================================
-# ===== دوال مساعدة مطلوبة من handlers_user.py =====
-# =============================================================================
-
-def get_fastcard_offer(prefix: str, offer_id: str, custom_offer=None):
-    """يرجع (offer, cat) للعرض المطلوب. يدعم العروض الديناميكية (custom_offer)."""
-    import sys
-    cat = FASTCARD_CATEGORIES.get(prefix)
-    if not cat:
-        return None, None
-    if custom_offer and custom_offer.get("id") == offer_id:
-        return custom_offer, cat
-    offers_attr = cat.get("offers_attr")
-    if not offers_attr:
-        return None, None
-    offers = getattr(sys.modules[__name__], offers_attr, []) or []
-    offer = next((o for o in offers if o.get("id") == offer_id), None)
-    if offer:
-        return offer, cat
-    return None, None
+  def get_fastcard_offer(prefix: str, offer_id: str, custom_offer=None):
+      """إرجاع بيانات عرض واحد من FASTCARD_CATEGORIES أو custom_offer."""
+      import sys
+      cat = FASTCARD_CATEGORIES.get(prefix)
+      if not cat:
+          return None
+      if custom_offer:
+          return custom_offer
+      offers = getattr(sys.modules.get("bot.config", sys.modules[__name__]),
+                       cat["offers_attr"], [])
+      return next((o for o in offers if o.get("id") == offer_id), None)
 
 
-def sanitize_for_storage(data, extra_redact_values=None) -> str:
-    """يحوّل data لـ JSON string آمن للتخزين مع إخفاء القيم الحساسة."""
-    import json
-    try:
-        text = json.dumps(data, ensure_ascii=False, default=str)
-    except Exception:
-        text = str(data)
-    if extra_redact_values:
-        for val in extra_redact_values:
-            v = str(val or "").strip()
-            if len(v) > 2:
-                text = text.replace(v, "***")
-    return text[:3000]
+  def sanitize_for_storage(data, extra_redact_values=None) -> str:
+      """تحويل dict لنص آمن مع إخفاء كلمات المرور."""
+      import json
+      SENSITIVE = {"password", "pass", "كلمة مرور", "كلمة_مرور"}
+      extras = set(extra_redact_values or [])
+      if not isinstance(data, dict):
+          return str(data)
+      out = {}
+      for k, v in data.items():
+          if k.lower() in SENSITIVE or str(v) in extras:
+              out[k] = "***"
+          else:
+              out[k] = v
+      return json.dumps(out, ensure_ascii=False)
 
 
-def mask_field_value(field: dict, value: str) -> str:
-    """يعيد القيمة مخفية إذا كانت كلمة مرور أو حساسة."""
-    if field.get("type") == "password" or field.get("sensitive"):
-        if not value:
-            return "***"
-        if len(value) <= 3:
-            return "***"
-        return value[0] + "*" * (len(value) - 2) + value[-1]
-    return value
+  def mask_field_value(key: str, value: str) -> str:
+      """إخفاء جزئي لقيمة حساسة (كلمة مرور)."""
+      SENSITIVE = {"password", "pass"}
+      if key.lower() in SENSITIVE:
+          return "***"
+      if len(value) > 4:
+          return value[:2] + "***" + value[-2:]
+      return "***"
 
 
-def summarize_fields_for_db(fields: list, fc_fields: dict) -> str:
-    """يبني ملخّص آمن للحقول يُخزَّن في عمود player_id بجدول orders."""
-    parts = []
-    for f in fields:
-        v = str(fc_fields.get(f["key"], "") or "").strip()
-        if not v:
-            continue
-        t = f.get("type", "")
-        sensitive = f.get("sensitive") or t == "password"
-        if sensitive:
-            parts.append(f"{f['label']}: ***")
-        elif t == "id":
-            parts.append(f"ID:{v}")
-        elif t == "phone":
-            parts.append(f"📱{v}")
-        elif t == "email":
-            parts.append(v)
-        elif t == "url":
-            parts.append(v)
-        else:
-            parts.append(v)
-    return " | ".join(parts) if parts else "—"
+  def summarize_fields_for_db(fields: list, user_data: dict) -> str:
+      """نص موجز لحقول الطلب يُخزَّن في قاعدة البيانات."""
+      parts = []
+      for f in fields:
+          k = f["key"]
+          v = user_data.get(k, "")
+          parts.append(f"{f.get('label', k)}: {mask_field_value(k, str(v))}")
+      return " | ".join(parts)
 
 
-def build_custom_balance_offer(prefix: str, amount: int):
-    """يبني عرض ديناميكي لأقسام الرصيد المفتوح المبلغ.
-    يرجع (offer_dict, None) عند النجاح أو (None, error_msg) عند الفشل.
-    """
-    cat = FASTCARD_CATEGORIES.get(prefix)
-    if not cat or not cat.get("custom_amount"):
-        return None, "قسم غير صالح أو لا يدعم المبلغ المفتوح"
-    product_id = cat.get("custom_product_id", 0)
-    if not product_id:
-        return None, "product_id غير مضبوط — أضفه في FASTCARD_CATEGORIES"
-    markup_pct = int(cat.get("markup_pct", 10))
-    price = int(amount * (1 + markup_pct / 100))
-    offer = {
-        "id": f"custom_{prefix}_{amount}",
-        "label": f'{amount:,} ل.س'.replace(",", "،"),
-        "price": price,
-        "product_id": product_id,
-        "qty": amount,
-        "cost_usd": None,
-        "enabled": True,
-    }
-    return offer, None
+  def build_custom_balance_offer(prefix: str, amount: int):
+      """بناء عرض مؤقت لأقسام الرصيد المفتوح المبلغ."""
+      cat = FASTCARD_CATEGORIES.get(prefix)
+      if not cat or not cat.get("custom_amount"):
+          return None, "هذا القسم لا يدعم المبالغ المخصصة"
+      product_id = cat.get("product_id", "")
+      if not product_id:
+          return None, "product_id غير مضبوط — أضفه في FASTCARD_CATEGORIES"
+      markup = int(cat.get("markup_pct", 10))
+      final_price = int(amount * (1 + markup / 100))
+      offer = {
+          "id": f"custom_{prefix}_{amount}",
+          "label": f"{cat['title']} — {amount:,} ل.س".replace(",", "،"),
+          "product_id": product_id,
+          "price_syp": final_price,
+          "quantity": amount,
+      }
+      return offer, None
+  
