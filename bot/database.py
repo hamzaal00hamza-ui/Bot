@@ -170,7 +170,10 @@ def init_db():
 
 @contextmanager
 def get_conn():
-    conn = sqlite3.connect(config.DB_PATH)
+    import os as _os
+    _db_dir = _os.path.dirname(config.DB_PATH)
+    if _db_dir:
+        _os.makedirs(_db_dir, exist_ok=True)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
