@@ -1090,7 +1090,23 @@ def consume_transaction(transaction_id: int, user_id: int, amount: float) -> boo
                 "INSERT INTO consumed_transactions (transaction_id, user_id, amount, consumed_at) VALUES (?, ?, ?, ?)",
                 (transaction_id, user_id, amount, now_iso()),
             )
-            conn.commit()
+    
+          # جدول عروض Fastcard (تُدار عبر لوحة الأدمن)
+          cur.execute("""
+              CREATE TABLE IF NOT EXISTS fc_offers (
+                  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                  prefix      TEXT NOT NULL,
+                  offer_id    TEXT NOT NULL,
+                  label       TEXT NOT NULL,
+                  price_syp   INTEGER NOT NULL,
+                  product_id  TEXT NOT NULL,
+                  position    INTEGER DEFAULT 0,
+                  created_at  TEXT,
+                  UNIQUE(prefix, offer_id)
+              )
+          """)
+          cur.execute("CREATE INDEX IF NOT EXISTS idx_fc_offers_prefix ON fc_offers(prefix, position)")
+        conn.commit()
             return True
     except sqlite3.IntegrityError:
         return False
@@ -1114,3 +1130,54 @@ def get_followup_orders(limit: int = 50) -> List[Dict[str, Any]]:
             (*unresolved, limit),
         )
         return [dict(r) for r in cur.fetchall()]
+
+
+  # ─── عروض Fastcard ────────────────────────────────────────────────────────────
+  def get_fc_offers(prefix: str) -> List[Dict[str, Any]]:
+      """إرجاع قائمة العروض لقسم محدد — بالتنسيق المتوافق مع keyboards.py."""
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute(
+              "SELECT * FROM fc_offers WHERE prefix=? ORDER BY position ASC, id ASC",
+              (prefix,),
+          )
+          return [
+              {"id": r["offer_id"], "label": r["label"],
+               "price_syp": r["price_syp"], "product_id": r["product_id"]}
+              for r in cur.fetchall()
+          ]
+
+
+  def save_fc_offer(prefix: str, label: str, price_syp: int, product_id: str) -> str:
+      """إضافة عرض جديد — يرجع offer_id."""
+      import uuid as _uuid
+      offer_id = _uuid.uuid4().hex[:8]
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute(
+              "INSERT INTO fc_offers (prefix, offer_id, label, price_syp, product_id, created_at)"
+              " VALUES (?,?,?,?,?,?)",
+              (prefix, offer_id, label, price_syp, product_id, now_iso()),
+          )
+          conn.commit()
+      return offer_id
+
+
+  def delete_fc_offer(prefix: str, offer_id: str) -> bool:
+      """حذف عرض واحد — يرجع True إذا حُذف."""
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute("DELETE FROM fc_offers WHERE prefix=? AND offer_id=?", (prefix, offer_id))
+          conn.commit()
+          return cur.rowcount > 0
+
+
+  def list_fc_prefixes_with_counts() -> List[Dict[str, Any]]:
+      """إرجاع كل البادئات الموجودة في fc_offers مع عدد عروضها."""
+      with get_conn() as conn:
+          cur = conn.cursor()
+          cur.execute(
+              "SELECT prefix, COUNT(*) as cnt FROM fc_offers GROUP BY prefix ORDER BY prefix"
+          )
+          return [dict(r) for r in cur.fetchall()]
+  
