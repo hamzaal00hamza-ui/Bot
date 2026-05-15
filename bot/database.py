@@ -1105,6 +1105,12 @@ def consume_transaction(transaction_id: int, user_id: int, amount: float) -> boo
                 "INSERT INTO consumed_transactions (transaction_id, user_id, amount, consumed_at) VALUES (?, ?, ?, ?)",
                 (transaction_id, user_id, amount, now_iso()),
             )
+            conn.commit()
+            return True
+    except sqlite3.IntegrityError:
+        return False
+
+
 # ─── عروض Fastcard ────────────────────────────────────────────────────────────
 def get_fc_offers(prefix: str) -> List[Dict[str, Any]]:
     """إرجاع قائمة العروض لقسم محدد — بالتنسيق المتوافق مع keyboards.py."""
