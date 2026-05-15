@@ -48,6 +48,17 @@ logger = logging.getLogger(__name__)
     ADMIN_USDT_CREDIT_AMOUNT,
 ) = range(100, 117)
 
+(
+    SETPROD_PREFIX,
+    SETPROD_ACTION,
+    SETPROD_LABEL,
+    SETPROD_PRICE,
+    SETPROD_PRODUCTID,
+    SETPROD_DEL_CONFIRM,
+) = range(200, 206)
+
+
+
 
 def is_admin(update: Update) -> bool:
     return config.ADMIN_ID and update.effective_user.id == config.ADMIN_ID
@@ -1973,3 +1984,217 @@ def register_admin_handlers(app):
 
     app.add_handler(CallbackQueryHandler(cb_admin_recharge_decision, pattern=r"^adm_rch:"))
     app.add_handler(CallbackQueryHandler(cb_admin_order_decision, pattern=r"^adm_ord:"))
+
+    # ─── إدارة عروض Fastcard (/setproduct) ───
+    sp_conv = ConversationHandler(
+        entry_points=[CommandHandler("setproduct", cmd_setproduct)],
+        states={
+            SETPROD_PREFIX: [
+                CallbackQueryHandler(cb_sp_prefix, pattern=r"^sp_pfx:"),
+                CallbackQueryHandler(cb_sp_cancel, pattern=r"^sp_cancel$"),
+            ],
+            SETPROD_ACTION: [
+                CallbackQueryHandler(cb_sp_add,    pattern=r"^sp_add:"),
+                CallbackQueryHandler(cb_sp_del,    pattern=r"^sp_del:"),
+                CallbackQueryHandler(cb_sp_back,   pattern=r"^sp_back$"),
+                CallbackQueryHandler(cb_sp_prefix, pattern=r"^sp_pfx:"),
+                CallbackQueryHandler(cb_sp_cancel, pattern=r"^sp_cancel$"),
+            ],
+            SETPROD_LABEL:      [MessageHandler(filters.TEXT & ~filters.COMMAND, msg_sp_label)],
+            SETPROD_PRICE:      [MessageHandler(filters.TEXT & ~filters.COMMAND, msg_sp_price)],
+            SETPROD_PRODUCTID:  [MessageHandler(filters.TEXT & ~filters.COMMAND, msg_sp_productid)],
+            SETPROD_DEL_CONFIRM: [
+                CallbackQueryHandler(cb_sp_del_yes, pattern=r"^sp_del_yes$"),
+                CallbackQueryHandler(cb_sp_prefix,  pattern=r"^sp_pfx:"),
+                CallbackQueryHandler(cb_sp_cancel,  pattern=r"^sp_cancel$"),
+            ],
+        },
+        fallbacks=[CommandHandler("cancel", admin_cancel)],
+        per_message=False,
+    )
+    app.add_handler(sp_conv)
+
+  # ═══════════════════════════════════════════════════════════════════
+  # /setproduct — إدارة عروض Fastcard مباشرةً من التيليغرام
+  # ═══════════════════════════════════════════════════════════════════
+
+  def _prod_prefix_keyboard():
+      from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+      cats = config.FASTCARD_CATEGORIES
+      keys = sorted(cats.keys())
+      rows = []
+      row = []
+      for k in keys:
+          title = cats[k]['title'][:16]
+          row.append(InlineKeyboardButton(f"{title} [{k}]", callback_data=f"sp_pfx:{k}"))
+          if len(row) == 2:
+              rows.append(row)
+              row = []
+      if row:
+          rows.append(row)
+      rows.append([InlineKeyboardButton("❌ إلغاء", callback_data="sp_cancel")])
+      return InlineKeyboardMarkup(rows)
+
+
+  def _prod_offers_keyboard(prefix: str):
+      from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+      offers = db.get_fc_offers(prefix)
+      rows = []
+      for o in offers:
+          label_short = o['label'][:30]
+          rows.append([InlineKeyboardButton(
+              f"🗑 {label_short} — {o['price_syp']:,} ل.س".replace(",", "،"),
+              callback_data=f"sp_del:{prefix}:{o['id']}"
+          )])
+      rows.append([InlineKeyboardButton("➕ إضافة عرض جديد", callback_data=f"sp_add:{prefix}")])
+      rows.append([InlineKeyboardButton("⬅️ رجوع للأقسام", callback_data="sp_back")])
+      return InlineKeyboardMarkup(rows)
+
+
+  async def cmd_setproduct(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      if not is_admin(update):
+          await update.message.reply_text("⛔ للأدمن فقط.")
+          return ConversationHandler.END
+      await update.message.reply_text(
+          "🛍 *إدارة عروض Fastcard*\n\nاختر القسم:",
+          reply_markup=_prod_prefix_keyboard(),
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_PREFIX
+
+
+  async def cb_sp_prefix(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      q = update.callback_query
+      await q.answer()
+      prefix = q.data.split(":", 1)[1]
+      context.user_data["sp_prefix"] = prefix
+      cat = config.FASTCARD_CATEGORIES.get(prefix, {})
+      title = cat.get("title", prefix)
+      offers = db.get_fc_offers(prefix)
+      text = (
+          f"📂 *{title}*\n"
+          f"البادئة: `{prefix}`\n"
+          f"عدد العروض: {len(offers)}\n\n"
+          "اضغط على عرض لحذفه، أو أضف عرضاً جديداً:"
+      )
+      await q.edit_message_text(text, reply_markup=_prod_offers_keyboard(prefix),
+                                parse_mode=ParseMode.MARKDOWN)
+      return SETPROD_ACTION
+
+
+  async def cb_sp_back(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      q = update.callback_query
+      await q.answer()
+      await q.edit_message_text(
+          "🛍 *إدارة عروض Fastcard*\n\nاختر القسم:",
+          reply_markup=_prod_prefix_keyboard(),
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_PREFIX
+
+
+  async def cb_sp_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      q = update.callback_query
+      await q.answer()
+      prefix = q.data.split(":", 1)[1]
+      context.user_data["sp_prefix"] = prefix
+      await q.edit_message_text(
+          f"➕ *إضافة عرض لـ [{prefix}]*\n\nأرسل *اسم العرض*:\n(مثال: بطاقة PSN 10$)",
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_LABEL
+
+
+  async def msg_sp_label(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      label = (update.message.text or "").strip()
+      if not label:
+          await update.message.reply_text("⚠️ الاسم لا يمكن أن يكون فارغاً، أرسله مجدداً:")
+          return SETPROD_LABEL
+      context.user_data["sp_label"] = label
+      await update.message.reply_text(
+          f"✅ الاسم: *{label}*\n\n💰 أرسل *السعر بالليرة السورية* (أرقام فقط):",
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_PRICE
+
+
+  async def msg_sp_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      text = (update.message.text or "").strip().replace(",", "").replace("،", "")
+      if not text.isdigit() or int(text) <= 0:
+          await update.message.reply_text("⚠️ أرسل رقماً صحيحاً موجباً للسعر:")
+          return SETPROD_PRICE
+      context.user_data["sp_price"] = int(text)
+      price_fmt = f"{int(text):,}".replace(",", "،")
+      await update.message.reply_text(
+          f"✅ السعر: *{price_fmt} ل.س*\n\n🔑 أرسل *Product ID* من لوحة Fastcard:",
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_PRODUCTID
+
+
+  async def msg_sp_productid(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      product_id = (update.message.text or "").strip()
+      if not product_id:
+          await update.message.reply_text("⚠️ Product ID لا يمكن أن يكون فارغاً:")
+          return SETPROD_PRODUCTID
+      prefix = context.user_data.get("sp_prefix", "")
+      label  = context.user_data.get("sp_label", "")
+      price  = context.user_data.get("sp_price", 0)
+      offer_id = db.save_fc_offer(prefix, label, price, product_id)
+      price_fmt = f"{price:,}".replace(",", "،")
+      await update.message.reply_text(
+          f"✅ *تم الحفظ!*\n\n"
+          f"📂 القسم: `{prefix}`\n"
+          f"🏷 الاسم: {label}\n"
+          f"💰 السعر: {price_fmt} ل.س\n"
+          f"🔑 Product ID: `{product_id}`\n\n"
+          "يمكنك إضافة المزيد أو الرجوع:",
+          reply_markup=_prod_offers_keyboard(prefix),
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_ACTION
+
+
+  async def cb_sp_del(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+      q = update.callback_query
+      await q.answer()
+      _, prefix, offer_id = q.data.split(":", 2)
+      context.user_data["sp_del_prefix"]   = prefix
+      context.user_data["sp_del_offer_id"] = offer_id
+      offers = db.get_fc_offers(prefix)
+      offer  = next((o for o in offers if o["id"] == offer_id), None)
+      label  = offer["label"] if offer else offer_id
+      await q.edit_message_text(
+          f"🗑 *تأكيد الحذف*\n\nهل تريد حذف:\n*{label}*\n\n⚠️ لا يمكن التراجع.",
+          reply_markup=InlineKeyboardMarkup([
+              [InlineKeyboardButton("✅ نعم احذف", callback_data="sp_del_yes"),
+               InlineKeyboardButton("❌ إلغاء",    callback_data=f"sp_pfx:{prefix}")],
+          ]),
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_DEL_CONFIRM
+
+
+  async def cb_sp_del_yes(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      q = update.callback_query
+      await q.answer()
+      prefix   = context.user_data.get("sp_del_prefix", "")
+      offer_id = context.user_data.get("sp_del_offer_id", "")
+      deleted  = db.delete_fc_offer(prefix, offer_id)
+      msg = "✅ تم الحذف." if deleted else "⚠️ لم يُعثر على العرض."
+      await q.edit_message_text(
+          f"{msg}\n\nعروض القسم [{prefix}]:",
+          reply_markup=_prod_offers_keyboard(prefix),
+          parse_mode=ParseMode.MARKDOWN,
+      )
+      return SETPROD_ACTION
+
+
+  async def cb_sp_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+      q = update.callback_query
+      await q.answer()
+      await q.edit_message_text("❌ تم الإلغاء.")
+      return ConversationHandler.END
+
+  
